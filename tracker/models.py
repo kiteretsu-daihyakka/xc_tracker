@@ -25,20 +25,24 @@ class ItemCategory(models.Model):
 	category_name = models.CharField(unique=True, max_length=450)
 	brand = models.ForeignKey(Brand,models.DO_NOTHING,null=False)
 	
+	class Meta:
+		verbose_name = 'Category'
+		verbose_name_plural = 'Categories'
+		
 	def __str__(self):
 		return self.category_name
 	
 class Item(models.Model):
-	item_name = models.CharField(unique=False,max_length=450)
+	item_name = models.CharField(max_length=450)
 	price = models.IntegerField(blank=False,null=False,default=0)
 	category = models.ForeignKey(ItemCategory,models.DO_NOTHING,null=False)
-	current_stock = models.IntegerField(default=0)
+	current_stock = models.IntegerField(default=None)
 	
 	class Meta:
-		unique_together = (('item_name', 'category'),)
+		unique_together = (('item_name','price', 'category'),)
 	
 	def __str__(self):
-		return self.item_name #+' ('+ str(self.current_stock)+')'
+		return self.item_name +' ('+ str(self.price)+'Rs)'
 	
 	def get_price(self):
 		return self.price
@@ -52,10 +56,10 @@ class SoldItem(models.Model):
 	item_quantity = models.IntegerField(blank=False,null=False)
 	price = models.FloatField(blank=False,null=False)
 	
-	def save(self,*args,**kwargs):
-		self.item.current_stock -= self.item_quantity
-		self.item.save()
-		super(SoldItem,self).save(*args,**kwargs)
+	# def save(self,*args,**kwargs):
+		# self.item.current_stock -= self.item_quantity
+		# self.item.save()
+		# super(SoldItem,self).save(*args,**kwargs)
 
 def whatsapp_greetings(message,mobile):
 	pywhatkit.sendwhatmsg('+91'+str(mobile),message,datetime.datetime.now().hour,datetime.datetime.now().minute+1)
@@ -69,10 +73,13 @@ class InvoiceSells(models.Model):
 	discount = models.FloatField(blank=True,null=True)
 	customer = models.CharField(max_length=200 ,blank=True,null=True)
 	mobile = models.CharField(max_length=10,null=True, blank=True)
-	dos = models.DateTimeField(auto_now_add=True) #dos = date of selling
+	dos = models.DateTimeField(auto_now_add=True,verbose_name='date of selling') #dos = date of selling
 	status = models.BooleanField(verbose_name='Status (Paid or Not)') # payment performed or not
 	payment_mode = models.CharField(max_length=50,blank=True,null=True)
 	
+	class Meta:
+		verbose_name = 'Sell'
+		verbose_name_plural = 'Sells'
 	# def save(self,*args,**kwargs):
 		# if self.mobile != None:
 			# items = ''
@@ -92,18 +99,22 @@ class PurchasedItem(models.Model):
 	item_quantity = models.IntegerField(blank=False,null=False)
 	price = models.FloatField(blank=False,null=False)
 	
-	def save(self,*args,**kwargs):
-		print('args: ',args)
-		print('kwargs: ',kwargs)
-		self.item.current_stock += self.item_quantity
-		self.item.save()
-		super(PurchasedItem,self).save(*args,**kwargs)
+	# def save(self,*args,**kwargs):
+		# print('args: ',args)
+		# print('kwargs: ',kwargs)
+		# self.item.current_stock += self.item_quantity
+		# self.item.save()
+		# super(PurchasedItem,self).save(*args,**kwargs)
 
 class InvoicePurchase(models.Model):
 	total_amount = models.FloatField(blank=False,null=False)
-	dop = models.DateTimeField(auto_now_add=True) #dop = date of purchase
+	dop = models.DateTimeField(auto_now_add=True,verbose_name='date of purchase') #dop = date of purchase
 	status = models.BooleanField() # payment performed or not
 	payment_mode = models.CharField(max_length=50,blank=False,null=False)
+	
+	class Meta:
+		verbose_name = 'Purchase'
+		verbose_name_plural = 'Purchases'
 	
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)

@@ -15,9 +15,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+#import admin_reports
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-	path('',include('tracker.urls'))
+	#path('admin/', include(admin_reports.site.urls')),
+	path('',include('tracker.urls')),
 	
 ]
+
+
+# urlpatterns = patterns(
+    # ...
+    # url(r'^admin/', include(admin.site.urls)),
+    
+    # ...
+# )

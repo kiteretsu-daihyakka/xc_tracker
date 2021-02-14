@@ -3,6 +3,17 @@ from .models import Brand,Item,PurchasedItem,SoldItem,InvoiceSells,InvoicePurcha
 from django.contrib.auth.models import Group,User
 import pywhatkit
 import datetime
+
+#from .reports import MyReport
+
+# from reports.base import ModelReport
+
+# class MyReport(ModelReport):
+	# queryset = InvoiceSells.objects.all()
+	# name = "Report - My Report"
+	
+#reports.register(InvoiceSells, MyReport)
+
 # from forms import LovelyModelForm
 
 # class LovelyModelAdmin(admin.ModelAdmin):
@@ -22,7 +33,7 @@ admin.site.unregister(User)
 
 class PurchasedItemAdmin(admin.TabularInline):
 	model = PurchasedItem
-	
+	autocomplete_fields = ('item',)
 	# def save_model(self,request,obj,form,change):
 		# print('sub model save pre')
 		# super().save_model(request,obj,form,change)
@@ -40,6 +51,7 @@ class PurchasedItemAdmin(admin.TabularInline):
 class InvoicePurchaseAdmin(admin.ModelAdmin):
 	#exclude = ('invoice_id',)
 	#readonly_fields = ('item','item_quantity','price') 
+	list_display = ('dop','total_amount','payment_mode','status',)
 	
 	class Media:
 		js =(
@@ -68,24 +80,31 @@ class InvoicePurchaseAdmin(admin.ModelAdmin):
 		invoice_purchase_obj = form.save()
 		print(datetime.datetime.now())
 		print(invoice_purchase_obj.dop)
-		
-		for inline_form in formsets:
-			#print('inline form:  ',inline_form)
-			if inline_form.has_changed():
-				print('coming in change')
-				obj = inline_form.save(commit=False)
-				print('obj above for loop: ',obj)
-				for purchased_item  in invoice_purchase_obj.purchaseditem_set.all():
-					print('obj: ',obj[0])
-					if obj[0] == purchased_item:
-						print('obj in if: ',purchased_item)
-						purchased_item.item.current_stock -= purchased_item.item_quantity
-						purchased_item.item.current_stock += obj[0].item_quantity
-						purchased_item.item.save()
+		if change == False:
+			for inline_form in formsets:
+				obj = inline_form.save()
+				obj[0].item.current_stock += obj[0].item_quantity
+				obj[0].item.save()
+		else:	
+			for inline_form in formsets:
+				#print('inline form:  ',inline_form)
+				if inline_form.has_changed():
+					print('coming in change')
+					obj = inline_form.save(commit=False)
+					print('obj above for loop: ',obj)
+					for purchased_item  in invoice_purchase_obj.purchaseditem_set.all():
+						print('obj: ',obj[0])
+						if obj[0] == purchased_item:
+							print('obj in if: ',purchased_item)
+							purchased_item.item.current_stock -= purchased_item.item_quantity
+							purchased_item.item.current_stock += obj[0].item_quantity
+							purchased_item.item.save()
 			# else:
+				# print('coming in else')
 				# obj = inline_form.save(commit=False)
 				# obj[0].item.current_stock += obj[0].item_quantity
 				# obj[0].item.save()
+				# obj[0].save()
 			
 			#for purchased_item  in invoice_purchase_obj.purchaseditem_set.all():
 				
@@ -110,11 +129,14 @@ class InvoicePurchaseAdmin(admin.ModelAdmin):
 			print('child not changed')
 			# obj = form.save()
 		
-admin.site.register(ItemCategory)
+@admin.register(ItemCategory)
+class ItemCategoryListAdmin(admin.ModelAdmin):
+	list_display = ('category_name','brand')
 
 class ItemCategoryAdmin(admin.TabularInline):
 	model = ItemCategory
-
+	
+	
 # admin.site.title='XOCOLAT'
 
 
@@ -155,7 +177,9 @@ class SoldItemAdmin(admin.TabularInline):
 	
 @admin.register(InvoiceSells)
 class InvoiceSellsAdmin(admin.ModelAdmin):
+	admin.title = 'Sells'
 	#exclude = ('invoice_id',)
+	list_display = ('dos','total_amount','discount','customer','payment_mode','status',)
 	#readonly_fields = ('item','item_quantity','price') 
 	
 	class Media:
@@ -190,6 +214,29 @@ class InvoiceSellsAdmin(admin.ModelAdmin):
 			# print('inline form: ',inline.form)
 	
 	def save_related(self, request,form,formsets,change):
+		sells_obj = form.save()
+		print(datetime.datetime.now())
+		print(sells_obj.dos)
+		if change == False:
+			for inline_form in formsets:
+				obj = inline_form.save()
+				obj[0].item.current_stock -= obj[0].item_quantity
+				obj[0].item.save()
+		else:	
+			for inline_form in formsets:
+				#print('inline form:  ',inline_form)
+				if inline_form.has_changed():
+					print('coming in change')
+					obj = inline_form.save(commit=False)
+					print('obj above for loop: ',obj)
+					for sold_item  in sells_obj.solditem_set.all():
+						print('obj: ',obj[0])
+						if obj[0] == sold_item:
+							print('obj in if: ',sold_item)
+							sold_item.item.current_stock += sold_item.item_quantity
+							sold_item.item.current_stock -= obj[0].item_quantity
+							sold_item.item.save()
+	
 		super().save_related(request, form, formsets, change=change)
 		#print('form save_related:' , form)
 		# if form.pk:
