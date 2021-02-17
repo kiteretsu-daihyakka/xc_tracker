@@ -1,0 +1,19 @@
+{% extends 'admin/base.html' %}
+
+{% load staticfiles %}
+
+{% block branding %}
+
+	<h1 id="site-name">
+		<a href="{% url 'admin:index' %}">
+			<img src="{% static 'umsra_logo.png' %}" height="40px" />
+		</a>
+	</h1>
+
+{% endblock branding %}
+
+{% block extrastyle %}
+	
+	<a href="/sahil">End Today Stock</a>
+	
+{% endblock %}

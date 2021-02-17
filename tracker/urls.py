@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import stock_details
+from .views import redirect_page,stock_details
 
 urlpatterns = [
-	path('',stock_details)
+	path('',redirect_page)
 ]

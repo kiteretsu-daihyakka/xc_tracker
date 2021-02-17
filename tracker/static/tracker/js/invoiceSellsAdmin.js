@@ -1,4 +1,5 @@
 $(document).ready(function(){
+	$('#content-related').hide();
 	//$('#id_total_amount').val(0);
 	$('.field-price input').on('change',function(){
 		$('#id_total_amount').val(0);

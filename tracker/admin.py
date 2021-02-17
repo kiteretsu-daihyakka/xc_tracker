@@ -23,13 +23,25 @@ import datetime
 
 # Register your models here.
 
+from django.contrib.admin.models import LogEntry
+
+LogEntry.objects.all().delete()
+
 admin.site.site_title = 'XOCOLAT'
 admin.site.site_header = "XOCOLAT CHOCOLATIERS CAFE"
+admin.site.index_title = "Kwality Walls's Sales"
 
-admin.site.register(Brand)
+admin.site.disable_action('delete_selected')
+		
+# admin.site.disable_action('change')
+
+#admin.site.register(Brand)
 #admin.site.register(SoldItem)
 admin.site.unregister(Group)
 admin.site.unregister(User)
+
+# class ReadOnlyMixin(): # Add inheritance from "object" if using Python 2
+    # list_display_links = None
 
 class PurchasedItemAdmin(admin.TabularInline):
 	model = PurchasedItem

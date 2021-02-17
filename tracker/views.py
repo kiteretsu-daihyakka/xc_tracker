@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from .models import Item,SoldItem,PurchasedItem
 import pytesseract
@@ -25,16 +25,20 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 
+from time import sleep
 import time
 
 # Create your views here.
+def redirect_page(request):
+	stock_details()
+	return redirect('/admin/tracker/invoicesells/add/')
 
-def stock_details(request):
+def stock_details():
 	# help(pywhatkit)
 	# pywhatkit.help
 	# pywhatkit.manual()
-	# browser = webdriver.Chrome(os.path.join(BASE_DIR,'chromedriver'))
-	# browser.get('https://web.whatsapp.com/')
+	
+	
 	# wait = WebDriverWait(browser, 10000)
 	# target = '"temp_group"' #enter contact name here
 	# string = "Message by python!" #target msg
@@ -43,8 +47,8 @@ def stock_details(request):
 	# target.click()
 	
 	# input_box = browser.find_element_by_class_name('_1Plpp')
-	for i in range(100):#loops runs for 100 times
-		input_box.send_keys(string + Keys.ENTER)
+	# for i in range(100):#loops runs for 100 times
+		# input_box.send_keys(string + Keys.ENTER)
 
 	print('coming here')
 	title = ''	
@@ -109,6 +113,7 @@ def stock_details(request):
 	elems.append(table)
 
 	pdf.build(elems)
+		
 		# p.drawCentredString(274,800,'Orders')
 		# p.showPage()
 		# p.save()
@@ -118,16 +123,27 @@ def stock_details(request):
 	# return FileResponse(open(filename, 'rb'), as_attachment=False, filename=filename)
 	#file = open(filename, 'rb')
 	
-	# file_path = os.path.join(BASE_DIR,'KW_Today_Report.pdf') #file path
-	#This gives the image/file pathname.
-	# from time import sleep #sending image to whatsapp
-	# attachment_section = browser.find_element_by_xpath('//div[@title = "Attach"]')
-	# attachment_section.click()
-	# image_box = browser.find_element_by_xpath('//input[@accept="image/*,video/mp4,video/3gpp,video/quicktime"]')
-	# image_box.send_keys(file_path)
-	# sleep(3)
-	# send_button = browser.find_element_by_xpath('//span[@data-icon="send-light"]')
-	# send_button.click()
+	file_path = os.path.join(BASE_DIR,filename) #file path
+	
+	browser = webdriver.Chrome(os.path.join(BASE_DIR,'chromedriver'))
+	browser.get('https://web.whatsapp.com/')
+	sleep(6)
+	name = 'Sahil Xocolat'
+	user = browser.find_element_by_xpath('//span[@title= "{}"]'.format(name))
+	user.click()
+	
+	attachment_box = browser.find_element_by_xpath('//div[@title= "Attach"]')
+	attachment_box.click()
+	
+	document_box = browser.find_element_by_xpath(
+		'//input[@accept=""]'
+	)
+	document_box.send_keys(file_path)
+	
+	sleep(3)
+	
+	send_button = browser.find_element_by_xpath('//span[@data-icon="send-light"]')
+	send_button.click()
 	
 	# #pywhatkit.sendwhatmsg('+919737524730',file,datetime.datetime.now().hour,datetime.datetime.now().minute+1)
 	# return HttpResponse('Done')
