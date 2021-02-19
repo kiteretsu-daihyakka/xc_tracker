@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import Brand,Item,PurchasedItem,SoldItem,InvoiceSells,InvoicePurchase,ItemCategory
 from django.contrib.auth.models import Group,User
-import pywhatkit
+#import pywhatkit
 import datetime
 
 #from .reports import MyReport
@@ -33,7 +33,7 @@ admin.site.index_title = "Kwality Walls's Sales"
 
 admin.site.disable_action('delete_selected')
 		
-# admin.site.disable_action('change')
+# admin.site.disable_action('change_related')
 
 #admin.site.register(Brand)
 #admin.site.register(SoldItem)
@@ -45,7 +45,7 @@ admin.site.unregister(User)
 
 class PurchasedItemAdmin(admin.TabularInline):
 	model = PurchasedItem
-	autocomplete_fields = ('item',)
+	#autocomplete_fields = ('item',)
 	# def save_model(self,request,obj,form,change):
 		# print('sub model save pre')
 		# super().save_model(request,obj,form,change)
@@ -156,7 +156,7 @@ class ItemCategoryAdmin(admin.TabularInline):
 class ItemAdmin(admin.ModelAdmin):
 	list_display = ('item_name','price','current_stock','category',) 
 	list_filter = ('category',)
-	search_fields = ('item_name',)
+	#search_fields = ('item_name',)
 	
 	# readonly_fields = ('combined_fields',)
 	
@@ -173,7 +173,13 @@ class ItemAdmin(admin.ModelAdmin):
 
 class SoldItemAdmin(admin.TabularInline):
 	model = SoldItem
-	autocomplete_fields = ('item',)
+	def change_view(self, request, object_id, form_url='', extra_context=None):
+		extra_context = extra_context or {}
+		extra_context['osm_data'] = 'blah'
+		return super(SoldItemAdmin, self).change_view(
+			request, object_id, form_url, extra_context=extra_context,
+		)
+	#autocomplete_fields = ('item',)
 	
 	# def get_form(self, request, obj=None, **kwargs):
 		# form = super().get_form(request, obj, **kwargs)

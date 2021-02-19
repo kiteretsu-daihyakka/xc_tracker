@@ -1,11 +1,17 @@
 from django.forms import ModelForm
-from .models import SoldItem
+from .models import SoldItem,InvoiceSells
 # from widgets import WhateverWidgetIWant
 
-# class SoldItemForm(forms.ModelForm):
-    # def __init__(self, *args, **kwargs):
-        # super(SoldItemForm, self).__init__(*args, **kwargs)
-        # self.fields['item'].queryset = SoldItem.objects.filter(tenant=self.current_user)
+class InvoiceSellsForm(ModelForm):
+    """Form definition for InvoiceSells."""
 
-    # class Meta:
-        # model = SoldItem
+    class Meta:
+        """Meta definition for InvoiceSellsform."""
+
+        model = InvoiceSells
+        fields = ('customer','mobile','total_amount','discount','status','payment_mode')
+
+class SoldItemForm(ModelForm):
+    class Meta:
+        model = SoldItem
+        exclude = ('invoice_id',)

@@ -1,6 +1,9 @@
 from django.urls import path
-from .views import redirect_page,stock_details
+from .views import home,fetch_items
+
+app_name = 'tracker'
 
 urlpatterns = [
-	path('',redirect_page)
+	path('',home,name='home'),
+	path('fetch-items',fetch_items,name='fetch-items'),
 ]

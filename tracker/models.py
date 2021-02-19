@@ -7,7 +7,7 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 from django.core.validators import MinValueValidator
-import pywhatkit
+#import pywhatkit
 import datetime 
 
 #from phonenumber_field.modelfields import PhoneNumberField
