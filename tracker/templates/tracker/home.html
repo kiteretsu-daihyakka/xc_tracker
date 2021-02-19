@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='utf-8'>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+        <title>Xocolat Home Page</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        {% load static %}
+        <link href="{% static 'tracker/home.css' %}?{% now 'U' %}" rel="stylesheet" type="text/css" />
+        <link href="{% static 'tracker/boot/css/bootstrap.min.css' %}" media='screen' rel="stylesheet" type="text/css" />
+
+        <script src="{% static 'tracker/js/jquery-3.3.1.min.js' %}"></script>
+        <script src="{% static 'tracker/boot/js/bootstrap.min.js' %}"></script>
+        <script>
+            var fetchItems = "{% url 'tracker:fetch-items' %}";
+        </script>
+        
+        <script src="{% static 'tracker/js/home.js' %}?{% now 'U' %}"></script>
+    </head>
+    <body>
+        <form method="GET" enctype="multipart/form-data">
+           {% csrf_token %}
+            <table id="categoryTable" style="width: 100%;">
+                <tr>
+                    {% for category in categories %}
+                    <td><button class="categoryBtn" type="button" value="{{category.id}}">{{category}}</button></td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </form>
+        <!-- <table id="itemTable">
+            <tr>
+                <td> -->
+            <div>
+                {% for item in items %}
+                <div class="card itemCard parentCategory{{item.category.id}}" style="width: 18rem;float:left;display:none;">
+                    <!-- <img class="card-img-top" src="..." alt="Card image cap"> -->
+                    <div class="card-body">
+                      <h5 class="card-title">{{item}}</h5>
+                      <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                      <a href="#" class="btn btn-primary">Go somewhere</a> -->
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- </td>
+            </tr>
+        </table> -->
+        <br>
+        <br>
+        <br>
+        <form>
+            
+            <table id='soldItemTbl'>
+                <tr>
+                    
+                </tr>
+            </table>
+            <table>
+                {{sellsForm.as_table}}
+            </table>
+        </form>
+    </body>
+</html>

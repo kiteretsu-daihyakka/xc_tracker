@@ -1,12 +1,14 @@
+from django.http.response import JsonResponse
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
-from .models import Item,SoldItem,PurchasedItem
-import pytesseract
+from .models import Item,SoldItem,PurchasedItem,ItemCategory
+from .forms import InvoiceSellsForm,SoldItemForm
+#import pytesseract
 from PIL import Image
-from googletrans import Translator
+#from googletrans import Translator
 from xc_stock_tracker.settings import BASE_DIR
 import os
-import pywhatkit
+#import pywhatkit
 import datetime
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image
 from reportlab.lib.pagesizes import letter,landscape
@@ -28,9 +30,21 @@ from selenium.webdriver.common.by import By
 from time import sleep
 import time
 
-# Create your views here.
+def home(request):
+	context = {'categories':ItemCategory.objects.all(),'items':Item.objects.all(),'sellsForm':InvoiceSellsForm(),'soldItemForm':SoldItemForm()}
+	return render(request,'tracker/home.html',context=context)
+
+def fetch_items(request):
+	lst = []
+	for item in Item.objects.filter(category__id=request.GET.get('categoryId')):
+		lst.append({'id':item.id,'item_name':item.item_name})
+	data={
+		'items':lst,
+	}
+	return JsonResponse(data)
+
 def redirect_page(request):
-	stock_details()
+	#stock_details()
 	return redirect('/admin/tracker/invoicesells/add/')
 
 def stock_details():
@@ -162,7 +176,7 @@ def stock_details():
 	#return render(request,'tracker/stock_detail.html',{'items':Item.objects.all(),'result':'result'})
 	
 def whatsapp_greetings():
-	pywhatkit.sendwhatmsg('+918128940916',"Greetings from xocolate, Please give us feedback how you find your ice cream/corn provided by kwality wall's",datetime.datetime.now().hour,datetime.datetime.now().minute+1)
+	pywhatkit.sendwhatmsg('',"Greetings from xocolate, Please give us feedback how you find your ice cream/corn provided by kwality wall's",datetime.datetime.now().hour,datetime.datetime.now().minute+1)
 	return None
 	
 	

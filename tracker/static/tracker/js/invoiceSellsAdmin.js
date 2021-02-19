@@ -1,4 +1,5 @@
 $(document).ready(function(){
+	$('.change-related,.add-related,.delete-related').hide();
 	$('#content-related').hide();
 	//$('#id_total_amount').val(0);
 	$('.field-price input').on('change',function(){
@@ -11,7 +12,7 @@ $(document).ready(function(){
 		});
 	});
 	$('.field-item_quantity input').on('change',function(){
-		var item_name = $(this).parent().siblings('.field-item').find('select option').text();
+		var item_name = $(this).parent().siblings('.field-item').find('select option:selected').text();
 		//console.log(item_name);
 		var start = item_name.lastIndexOf('(');
 		var end = item_name.lastIndexOf(')');
@@ -29,6 +30,10 @@ $(document).ready(function(){
 	});
 	//console.log($('.field-item div select'));
 	$('.field-item div select').change(function(){
-		console.log('changed');
+		console.log($(this).parent().parent().siblings('.field-item_quantity').find('input').val());
+		if($(this).parent().parent().siblings('.field-item_quantity').find('input').val() == ''){
+			$(this).parent().parent().siblings('.field-item_quantity').find('input').val(1);
+		}
+		$(this).parent().parent().siblings('.field-item_quantity').find('input').change();
 	});
 });
