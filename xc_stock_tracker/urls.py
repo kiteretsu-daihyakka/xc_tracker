@@ -18,7 +18,7 @@ from django.urls import path,include
 #import admin_reports
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),#,{'extra_context': {'mycontext': '123'}}),
 	#path('admin/', include(admin_reports.site.urls')),
 	path('',include('tracker.urls')),
 	

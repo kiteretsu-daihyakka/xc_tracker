@@ -1,8 +1,22 @@
 from django.contrib import admin
 from .models import Brand,Item,PurchasedItem,SoldItem,InvoiceSells,InvoicePurchase,ItemCategory
 from django.contrib.auth.models import Group,User
-#import pywhatkit
-import datetime
+# from nested_inlines.admin import NestedModelAdmin, NestedStackedInline, NestedTabularInline
+
+# #import pywhatkit
+# import datetime
+
+# class MyNestedInline(NestedTabularInline):
+	# model = Item
+
+# class MyInline(NestedStackedInline):
+	# model = SoldItem
+	# inlines = [MyNestedInline,]
+
+# class MyAdmin(NestedModelAdmin):
+	# inlines = [MyInline,]
+
+# admin.site.register(InvoiceSells, MyAdmin)
 
 #from .reports import MyReport
 
@@ -173,6 +187,8 @@ class ItemAdmin(admin.ModelAdmin):
 
 class SoldItemAdmin(admin.TabularInline):
 	model = SoldItem
+	#fields = ('item_category','item',)
+	#formfield_overrides = { models.TextField: {'category':ItemCategory.objects.all()} }
 	def change_view(self, request, object_id, form_url='', extra_context=None):
 		extra_context = extra_context or {}
 		extra_context['osm_data'] = 'blah'
@@ -206,8 +222,11 @@ class InvoiceSellsAdmin(admin.ModelAdmin):
             #'js/myscript.js',       # project static folder
             'tracker/js/invoiceSellsAdmin.js',   # app static folder
 		)
+		css = {
+             'all': ('tracker/css/my_own_admin.css',)
+        }
 	fieldsets = (
-		('CUSTOMER DETAIL', {
+		('CUSTOMER DETAILS', {
 			'fields':('customer','mobile')
 		}),
 		# ('SOLD ITEMS', {

@@ -1,9 +1,11 @@
-new stock arrival --> plus stock
-	a.for existing item **DONE**
-	b.for new item **DONE**
-B.sell 
-	1. minus stock **DONE**
-	2. category in invoice table for minimize item dropdown
-	3. Jquery for price counting according to quantity
-	4. Jquery for total amount according to prices **DONE**
+A.purchase --> plus stock
+**DONE**	a.for existing item 
+**DONE**	b.for new item 
 
+B.sell 
+**DONE**	1. minus stock 
+	2. category in invoice table for minimize item dropdown
+**DONE**	3. Jquery for price counting according to quantity 
+**DONE**	4. Jquery for total amount according to price
+	5. padding small
+	

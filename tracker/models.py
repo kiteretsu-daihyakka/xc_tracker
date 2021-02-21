@@ -74,7 +74,7 @@ class InvoiceSells(models.Model):
 	customer = models.CharField(max_length=200 ,blank=True,null=True)
 	mobile = models.CharField(max_length=10,null=True, blank=True)
 	dos = models.DateTimeField(auto_now_add=True,verbose_name='date of selling') #dos = date of selling
-	status = models.BooleanField(verbose_name='Status (Paid or Not)') # payment performed or not
+	status = models.BooleanField(verbose_name='Paid') # payment performed or not
 	payment_mode = models.CharField(max_length=50,blank=True,null=True)
 	
 	class Meta:

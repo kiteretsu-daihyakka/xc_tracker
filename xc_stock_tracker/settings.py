@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 	'tracker.apps.TrackerConfig',
-	
+	#'nested_inlines',
 	]
 
 MIDDLEWARE = [
