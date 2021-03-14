@@ -1,7 +1,8 @@
+from os.path import split
 from django.http.response import JsonResponse
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
-from .models import Item,SoldItem,PurchasedItem,ItemCategory
+from .models import Item,SoldItem,PurchasedItem,ItemCategory,InvoiceSells,PaymentMode
 from .forms import InvoiceSellsForm,SoldItemForm
 #import pytesseract
 from PIL import Image
@@ -29,15 +30,151 @@ from selenium.webdriver.common.by import By
 
 from time import sleep
 import time
+import openpyxl as xl
+
+# def readXL():
+# 	filename = 'KWALITY PRODUCT SALE REPORT 2021 (1).xlsx'
+# 	# filename = 'gradeData.xlsx'
+# 	filepath = os.path.join(BASE_DIR,filename)
+# 	wb = xl.load_workbook(filepath) #workbook
+# 	sheet = wb.active
+# 	max_col = sheet.max_column
+# 	print('max column :',max_col)
+# 	dateStored = None
+# 	paymodeStored = None
+
+# 	# invoice = InvoiceSells()
+# 	for ri in range(2,22):
+# 		# print(ri,end=' ')
+
+# 		product_cell = sheet.cell(row=ri,column=3) #product cell
+		
+# 		if product_cell.value != None:  
+# 			date = sheet.cell(row = ri, column = 1).value #date cell
+# 			paymode =sheet.cell(row = ri, column = 6).value #payment mode cell
+			
+# 			if date != None or paymode != paymodeStored:
+# 				if date != None:
+# 					dateStored = date
+# 				if paymode != paymodeStored:
+# 					paymodeStored = paymode
+
+# 				invoice = InvoiceSells()
+# 				invoice.dos = dateStored
+# 				invoice.discount = 0
+# 				invoice.customer = 'Unknown'
+# 				invoice.mobile = '9876543210'
+# 				invoice.total_amount = 0
+# 				invoice.status = True
+# 				print(paymode)
+# 				print('objs: ',PaymentMode.objects.filter(mode__contains = paymode))
+# 				print('objs: ',PaymentMode.objects.filter(mode__contains = paymode).first())
+# 				invoice.payment_mode = PaymentMode.objects.filter(mode__contains = paymode).first()
+# 			else:
+# 				invoice = InvoiceSells.objects.last()
+		
+		
+# 			invoice.save()
+# 			name = product_cell.value
+# 			print('name: ' ,name)
+# 			import re
+# 			item_lst = []
+# 			name = name.replace('-',' ')
+
+# 			for name_part in name.split(' '):
+# 				print('keyword: ',name_part)
+# 				if name_part != None:
+# 					for itm in Item.objects.filter(item_name__contains=name_part,price=(sheet.cell(row=ri,column=5).value /  sheet.cell(row=ri,column=4).value)):
+# 						exists = False
+# 						for ele in item_lst:
+# 							if ele['itm'] == itm :
+# 								exists = True
+# 								ele['occrnc'] += 1
+# 						if exists == False:
+# 							item_lst.append({'itm':itm,'occrnc':1})
+						
+# 			print('item_lst : ',item_lst)
+# 			max = 0
+# 			for ele in item_lst:
+# 				if max < ele['occrnc']:
+# 					max = ele['occrnc']
+		
+# 			for ele in item_lst:
+# 				if max == ele['occrnc']:
+# 					obj = SoldItem(invoice_id=invoice,item=ele['itm'],item_quantity=sheet.cell(row=ri,column=4).value,price=sheet.cell(row=ri,column=5).value)
+# 					obj.save()
+
+			# item_lst_dict = {}
+			# for obj in item_lst:
+			# 	print(item_lst.count(obj))
+				# print(obj)
+
+
+			# soldItm = Item.objects.filter(item_name__contains=([name_part ]),price=  sheet.cell(row=ri,column=4).value /  sheet.cell(row=ri,column=3).value).first()
+			# item = SoldItem(invoice_id= invoice,item=soldItm)
+			#all([cart_form.is_valid() for cart_form in cart_forms])
+			# if 'RAJWADI' in name:
+			# Item.objects.get(item_name__ne='RAJWADI')   
+			# item.item_quantity = sheet.cell(row=ri,column=3).value
+			# item.price = sheet.cell(row=ri,column=4).value
+			# item.save()
+
+		# print(cell.value,end=' ')
+		# print('')
+
+# readXL()
+
+# import pandas as pd
+# # Reading an excel file using Python
+# # --------------pandas method-------------
+# def pandaReadExcelForMe():
+# 	filename = 'KWALITY PRODUCT SALE REPORT 2021 (1).xlsx'
+# 	data = pd.read_excel(os.path.join(BASE_DIR,filename),engine='openpyxl')
+# 	df = pd.DataFrame(data,columns=['DATE','Total'])
+# 	print(df)
+
+# pandaReadExcelForMe()
+
+# Reading an excel file using Python
+# --------------xlrd method------------- ********not working************
+# import xlrd
+
+# def excelReading(): 
+# 	#Give the location of the file
+# 	filename = "studentExcelData.xls"
+# 	loc = (os.path.join(BASE_DIR,filename))
+	
+# 	# To open Workbook
+# 	wb = xlrd.open_workbook(loc)
+# 	sheet = wb.sheet_by_index(0)
+	
+# 	#For row 0 and column 0
+# 	print('cell-val: ',sheet.cell_value(0, 0))
+
+# excelReading()
 
 def home(request):
-	context = {'categories':ItemCategory.objects.all(),'items':Item.objects.all(),'sellsForm':InvoiceSellsForm(),'soldItemForm':SoldItemForm()}
+	sellsForm = InvoiceSellsForm(request.POST or None)
+	soldItemForm = SoldItemForm(request.POST or None)
+	if request.method=='POST': 
+		if sellsForm.is_valid() and soldItemForm.is_valid():
+			sellsForm.save()
+			print('valid form: ',soldItemForm)
+			soldItemForm.save()
+			# email = regi_form.cleaned_data.get('email')
+			print('valid')
+		else:
+			# print(regi_form.errors)
+			print('errors')
+	context = {'three':[1,2,3],'categories':ItemCategory.objects.all(),'items':Item.objects.all(),'sellsForm':sellsForm,'soldItemForm':soldItemForm}
+	#item_field = str(context['soldItemForm']['item']).replace('"',"'")
+	#context['itemField'] = item_field
 	return render(request,'tracker/home.html',context=context)
 
 def fetch_items(request):
 	lst = []
-	for item in Item.objects.filter(category__id=request.GET.get('categoryId')):
-		lst.append({'id':item.id,'item_name':item.item_name})
+	for item in Item.objects.filter(category__id=request.GET.get('categoryId'),current_stock__gt=0):
+		lst.append({'id':item.id,'item_name':item.item_name +' ('+ str(item.price) + ')' })
 	data={
 		'items':lst,
 	}
@@ -175,9 +312,9 @@ def stock_details():
 	
 	#return render(request,'tracker/stock_detail.html',{'items':Item.objects.all(),'result':'result'})
 	
-def whatsapp_greetings():
-	pywhatkit.sendwhatmsg('',"Greetings from xocolate, Please give us feedback how you find your ice cream/corn provided by kwality wall's",datetime.datetime.now().hour,datetime.datetime.now().minute+1)
-	return None
+# def whatsapp_greetings():
+# 	pywhatkit.sendwhatmsg('',"Greetings from xocolate, Please give us feedback how you find your ice cream/corn provided by kwality wall's",datetime.datetime.now().hour,datetime.datetime.now().minute+1)
+# 	return None
 	
 	
 	

@@ -1,0 +1,26 @@
+{% extends 'admin/change_form.html' %}
+{% load static %}
+<script src="{% static 'tracker/js/jquery-3.3.1.min.js' %}"></script>
+<script src="{% static 'tracker/js/invoiceSellsAdmin.js' %}"></script>
+{% block content %}
+
+{{ block.super }}
+<script>
+    var fetchItems = "{% url 'tracker:fetch-items' %}";
+</script>
+<div class="categoriesDD">
+    <select required>
+        <option></option>
+        {% for cat in categories %}
+        <option value="{{cat.id}}">{{cat}}</option>
+        {% endfor %}
+    </select>
+</div>
+<div id="itm-cat-container" hidden>
+    {% for itm in items %}
+    <div class="itm-cat" >
+        <span class="itmId">{{itm.id}}</span>:<span class="catId">{{itm.category__id}}</span><br>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

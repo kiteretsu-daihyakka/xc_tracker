@@ -14,51 +14,74 @@
         <script>
             var fetchItems = "{% url 'tracker:fetch-items' %}";
         </script>
-        
         <script src="{% static 'tracker/js/home.js' %}?{% now 'U' %}"></script>
     </head>
     <body>
-        <form method="GET" enctype="multipart/form-data">
-           {% csrf_token %}
-            <table id="categoryTable" style="width: 100%;">
+        <div hidden>
+            <form method="GET" enctype="multipart/form-data">
+            {% csrf_token %}
+                <table id="categoryTable" style="width: 100%;">
+                    <tr>
+                        {% for category in categories %}
+                        <td><button class="categoryBtn" type="button" value="{{category.id}}">{{category}}</button></td>
+                        {% endfor %}
+                    </tr>
+                </table>
+            </form>
+            <table id="itemTable">
                 <tr>
-                    {% for category in categories %}
-                    <td><button class="categoryBtn" type="button" value="{{category.id}}">{{category}}</button></td>
-                    {% endfor %}
+                    <td> 
+                        
+                
+                 </td>
                 </tr>
             </table>
-        </form>
-        <!-- <table id="itemTable">
-            <tr>
-                <td> -->
-            <div>
-                {% for item in items %}
-                <div class="card itemCard parentCategory{{item.category.id}}" style="width: 18rem;float:left;display:none;">
-                    <!-- <img class="card-img-top" src="..." alt="Card image cap"> -->
-                    <div class="card-body">
-                      <h5 class="card-title">{{item}}</h5>
-                      <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                      <a href="#" class="btn btn-primary">Go somewhere</a> -->
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            <!-- </td>
-            </tr>
-        </table> -->
-        <br>
-        <br>
-        <br>
-        <form>
-            
+            <br>
+            <br>
+            <br>
+        </div>
+
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
             <table id='soldItemTbl'>
                 <tr>
                     
                 </tr>
             </table>
-            <table>
-                {{sellsForm.as_table}}
+            
+            <table class="table">
+                {% for i in three %}
+                <tr class="soldItemRow">
+                    <td>
+                        <label>Category :</label>
+                        <select id='categoryDD{{i}}'>
+                            <option selected>--------</option>
+                            {% for cat in categories %}
+                                <option value="{{cat.id}}">{{cat}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    {% for field in soldItemForm %}
+                    <td>
+                        {{field.label}} : {{field}}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                <tr class="AddRow">
+                    <td colspan="*"><button type="button">Add Row</button></td>
+                </tr>
             </table>
+            <table class="table">
+                <tr>
+                    {% for field in sellsForm %}
+                    <td>
+                        {{field.label}} : {{field}}
+                    </td>
+                    {% endfor %}
+                </tr>
+            </table>
+            <input type="submit">
         </form>
     </body>
 </html>
