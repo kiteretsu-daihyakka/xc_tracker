@@ -1,10 +1,31 @@
 from django.contrib import admin
-from .models import Brand,Item,PurchasedItem,SoldItem,InvoiceSells,InvoicePurchase,ItemCategory
+from .models import Brand,Item,PurchasedItem,SoldItem,InvoiceSells,InvoicePurchase,ItemCategory,Gst,PaymentMode
 from django.contrib.auth.models import Group,User
 # from nested_inlines.admin import NestedModelAdmin, NestedStackedInline, NestedTabularInline
 
-# #import pywhatkit
-# import datetime
+# import pywhatkit
+import datetime
+
+from django.template.response import TemplateResponse
+from django.urls import path
+
+# class MyModelAdmin(admin.ModelAdmin):
+    # def get_urls(self):
+    #     urls = super().get_urls()
+    #     my_urls = [
+    #         path('/admin/my_view/', self.my_view),
+    #     ]
+    #     return my_urls + urls
+
+    # def my_view(self, request):
+    #     # ...
+    #     context = dict(
+    #        # Include common variables for rendering the admin template.
+    #        self.admin_site.each_context(request),
+    #        # Anything else you want in the context...
+    #        keyHere='this is value',
+    #     )
+    #     return TemplateResponse(request, "tracker/admin/aloha.html", context)
 
 # class MyNestedInline(NestedTabularInline):
 	# model = Item
@@ -37,9 +58,9 @@ from django.contrib.auth.models import Group,User
 
 # Register your models here.
 
-from django.contrib.admin.models import LogEntry
+# from django.contrib.admin.models import LogEntry
 
-LogEntry.objects.all().delete()
+# LogEntry.objects.all().delete()
 
 admin.site.site_title = 'XOCOLAT'
 admin.site.site_header = "XOCOLAT CHOCOLATIERS CAFE"
@@ -49,7 +70,6 @@ admin.site.disable_action('delete_selected')
 		
 # admin.site.disable_action('change_related')
 
-#admin.site.register(Brand)
 #admin.site.register(SoldItem)
 admin.site.unregister(Group)
 admin.site.unregister(User)
@@ -79,11 +99,23 @@ class InvoicePurchaseAdmin(admin.ModelAdmin):
 	#readonly_fields = ('item','item_quantity','price') 
 	list_display = ('dop','total_amount','payment_mode','status',)
 	
+	change_form_template = 'tracker/admin/my_change_form.html'
+	def changeform_view(self, request, object_id, form_url = '', extra_context = None ):
+		print('coming here')
+		extra_context = extra_context or {}
+		extra_context['categories'] = ItemCategory.objects.all()
+		return super(InvoicePurchaseAdmin,self).changeform_view(request, object_id, form_url=form_url, extra_context=extra_context)
+
 	class Media:
 		js =(
-            '//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js', # jquery
+            'tracker/js/jquery-3.3.1.min.js', # jquery
+            'tracker/js/moreOptions.js',   # app static folder
+			#'//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js', # jquery
             #'js/myscript.js',       # project static folder
             'tracker/js/invoiceSellsAdmin.js',   # app static folder
+			'tracker/js/hideSaveKeepEditing.js', #saveAndKeep Btn js
+			'tracker/js/common.js', #common js for all AdminModel
+
 		)
 	# fieldsets = (
 		# ('CUSTOMER DETAIL', {
@@ -158,10 +190,20 @@ class InvoicePurchaseAdmin(admin.ModelAdmin):
 @admin.register(ItemCategory)
 class ItemCategoryListAdmin(admin.ModelAdmin):
 	list_display = ('category_name','brand')
+	class Media:
+		js =(
+            'tracker/js/jquery-3.3.1.min.js', # jquery
+            'tracker/js/moreOptions.js',   # app static folder
+			#'//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js', # jquery
+            #'js/myscript.js',       # project static folder
+            #'tracker/js/invoiceSellsAdmin.js',   # app static folder
+			'tracker/js/hideSaveKeepEditing.js', #saveAndKeep Btn js
+			'tracker/js/common.js', #common js for all AdminModel
+
+		)
 
 class ItemCategoryAdmin(admin.TabularInline):
 	model = ItemCategory
-	
 	
 # admin.site.title='XOCOLAT'
 
@@ -170,7 +212,17 @@ class ItemCategoryAdmin(admin.TabularInline):
 class ItemAdmin(admin.ModelAdmin):
 	list_display = ('item_name','price','current_stock','category',) 
 	list_filter = ('category',)
-	#search_fields = ('item_name',)
+	
+	class Media:
+		js =(
+            'tracker/js/jquery-3.3.1.min.js', # jquery
+            #'js/myscript.js',       # project static folder
+            'tracker/js/moreOptions.js',   # app static folder
+			'tracker/js/hideSaveKeepEditing.js', #saveAndKeep Btn js
+			'tracker/js/common.js', #common js for all AdminModel
+
+		)
+	# search_fields = ('item_name',)
 	
 	# readonly_fields = ('combined_fields',)
 	
@@ -185,17 +237,28 @@ class ItemAdmin(admin.ModelAdmin):
 # admin.site.register(PurchasedItem)
 # admin.site.register(InvoicePurchase)
 
+# class SoldItemModelAdmin(admin.ModelAdmin):
+# 	admin.title = 'Hello'
+# 	list_display = ('upper_case_name',)
+	
+# 	def upper_case_name(self, obj):
+# 		return ("%s %s" % (obj.item.category, obj.item)).upper()
+# 	upper_case_name.short_description = 'NameHere'
+
 class SoldItemAdmin(admin.TabularInline):
 	model = SoldItem
+	admin.add_form_template = 'tracker/admin/aloha.html'
 	#fields = ('item_category','item',)
 	#formfield_overrides = { models.TextField: {'category':ItemCategory.objects.all()} }
-	def change_view(self, request, object_id, form_url='', extra_context=None):
-		extra_context = extra_context or {}
-		extra_context['osm_data'] = 'blah'
-		return super(SoldItemAdmin, self).change_view(
-			request, object_id, form_url, extra_context=extra_context,
-		)
-	#autocomplete_fields = ('item',)
+	
+
+	# def change_view(self, request, object_id, form_url='', extra_context=None):
+	# 	extra_context = extra_context or {}
+	# 	extra_context['osm_data'] = 'blah'
+	# 	return super(SoldItemAdmin, self).change_view(
+	# 		request, object_id, form_url, extra_context=extra_context,
+	# 	)
+	# autocomplete_fields = ('item',)
 	
 	# def get_form(self, request, obj=None, **kwargs):
 		# form = super().get_form(request, obj, **kwargs)
@@ -213,27 +276,59 @@ class SoldItemAdmin(admin.TabularInline):
 class InvoiceSellsAdmin(admin.ModelAdmin):
 	admin.title = 'Sells'
 	#exclude = ('invoice_id',)
-	list_display = ('dos','total_amount','discount','customer','payment_mode','status',)
-	#readonly_fields = ('item','item_quantity','price') 
+	list_display = ('total_amount','payment_mode','discount','dos','customer','mobile','status')
+	#readonly_fields = ('item','item_quantity','price')
 	
+	change_form_template = 'tracker/admin/my_change_form.html'
+	# def get_dynamic_info(self):
+	# 	pass
+	
+	def changeform_view(self, request, object_id, form_url = '', extra_context = None ):
+		print('coming here')
+		extra_context = extra_context or {}
+		extra_context['categories'] = ItemCategory.objects.all()
+		extra_context['items'] = Item.objects.values('id','category__id')
+		return super(InvoiceSellsAdmin,self).changeform_view(request, object_id, form_url=form_url, extra_context=extra_context)
+
+	# def get_urls(self):
+	# 	urls = super().get_urls()
+	# 	my_urls = [path('/admin/my_view/', self.my_view),]
+	# 	return my_urls + urls
+
+	# def my_view(self, request):
+        
+	# 	context = dict(
+    #        # Include common variables for rendering the admin template.
+    #        self.admin_site.each_context(request),
+    #        # Anything else you want in the context...
+    #        keyHere='this is value',
+    #     )
+	# 	return TemplateResponse(request, "tracker/admin/aloha.html", context)
+
 	class Media:
 		js =(
-            '//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js', # jquery
+            'tracker/js/jquery-3.3.1.min.js', # jquery
             #'js/myscript.js',       # project static folder
-            'tracker/js/invoiceSellsAdmin.js',   # app static folder
+            'tracker/js/invoiceSellsAdmin.js',   # invoiceJs
+			'tracker/js/moreOptions.js', #gst-tab specific js
+			'tracker/js/hideSaveKeepEditing.js', #saveAndKeep Btn js
+			'tracker/js/common.js', #common js for all AdminModel
 		)
 		css = {
              'all': ('tracker/css/my_own_admin.css',)
         }
 	fieldsets = (
 		('CUSTOMER DETAILS', {
-			'fields':('customer','mobile')
+			'fields':('customer','mobile',)
 		}),
 		# ('SOLD ITEMS', {
 			# 'fields':('id.solditem.item','item_quantity','price')
 		# }),
+		# (None,{
+		# 	'fields':('dos',)
+		# }),
 		('TOTAL', {
-			'fields':('total_amount','discount','status','payment_mode')
+			'fields':('total_amount','discount','discount_note','status','payment_mode')
 		}),
 		
 	)
@@ -257,8 +352,9 @@ class InvoiceSellsAdmin(admin.ModelAdmin):
 		if change == False:
 			for inline_form in formsets:
 				obj = inline_form.save()
-				obj[0].item.current_stock -= obj[0].item_quantity
-				obj[0].item.save()
+				if len(obj) > 0:
+					obj[0].item.current_stock -= obj[0].item_quantity
+					obj[0].item.save()
 		else:	
 			for inline_form in formsets:
 				#print('inline form:  ',inline_form)
@@ -294,17 +390,20 @@ class InvoiceSellsAdmin(admin.ModelAdmin):
 			# print('args: ',args)
 			# print('kwargs: ',kwargs)
 			discount = ''
-			if obj.discount != 0:
+			if obj.discount != 0 and obj.discount != None:
 				discount = '\n\nYooHoo!, You got '+str(obj.discount)+'Rs. Discount'
 			if obj.status == True:
-				status = '\n\nPaid via: ' + obj.payment_mode
+				status = '\n\nPaid via: ' + obj.payment_mode.mode
 			else:
 				status = '\n\nPayment status: pending'
-			message = 'Hello, '+obj.customer+items+discount+total_amount+status+'\n\nThank you for visiting xocolat!'
-			def whatsapp_greetings(message,mobile):
-				pywhatkit.sendwhatmsg('+91'+str(mobile),message,datetime.datetime.now().hour,datetime.datetime.now().minute+1)
-			print(message)
-			whatsapp_greetings(message,obj.mobile)
+			# customer = ''
+			# if not obj.customer:
+			# 	customer = ''
+			# message = 'Hello, '+str(obj.customer)+items+discount+total_amount+status+'\n\nThank you for visiting xocolat!'
+			# def whatsapp_greetings(message,mobile):
+			# 	pywhatkit.sendwhatmsg('+91'+str(mobile),message,datetime.datetime.now().hour,datetime.datetime.now().minute+1)
+			# print(message)
+			# whatsapp_greetings(message,obj.mobile)
 				
 			# if obj.mobile != None:
 				# items = ''
@@ -341,3 +440,34 @@ class InvoiceSellsAdmin(admin.ModelAdmin):
 # class SoldItemAdmin(admin.ModelAdmin):
 	# inlines = [InvoiceSellsAdmin]
 	
+@admin.register(Gst)
+class GstAdmin(admin.ModelAdmin):
+	list_display = ('cgst','sgst',)
+
+	class Media:
+		js =(
+            'tracker/js/jquery-3.3.1.min.js', # jquery
+            #'tracker/js/gstAdmin.js',   # app static folder
+			#'//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js', # jquery
+            #'js/myscript.js',       # project static folder
+            #'tracker/js/invoiceSellsAdmin.js',   # app static folder
+			'tracker/js/hideSaveKeepEditing.js', #saveAndKeep Btn js
+			'tracker/js/common.js', #common js for all AdminModel
+
+		)
+
+@admin.register(PaymentMode)
+class PaymentModeAdmin(admin.ModelAdmin):
+	# list_display = ('cgst','sgst',)
+
+	class Media:
+		js =(
+            'tracker/js/jquery-3.3.1.min.js', # jquery
+            #'tracker/js/moreOptions.js',   # app static folder
+			#'//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js', # jquery
+            #'js/myscript.js',       # project static folder
+            #'tracker/js/invoiceSellsAdmin.js',   # app static folder
+			'tracker/js/hideSaveKeepEditing.js', #saveAndKeep Btn js
+			'tracker/js/common.js', #common js for all AdminModel
+
+		)
