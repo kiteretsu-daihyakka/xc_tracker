@@ -6,13 +6,13 @@ $(document).ready(function () {
     
     $("<button class='btn pls-btn' type='button'>+</button> ").insertBefore(".field-item_quantity input");
     $(".field-item_quantity").append(" <button class='btn minus-btn' type='button'>-</button>");
-    $('.pls-btn').click(function () {
+    $(document).on('click','.pls-btn',function () {
         if($(this).siblings('input').val() != NaN){
             $(this).siblings('input').val(parseInt($(this).siblings('input').val())+1);
             $(this).siblings('input').keydown();
         }
     });
-    $('.minus-btn').click(function () {
+    $(document).on('click','.minus-btn',function () {
         if($(this).siblings('input').val() != ''){
             $(this).siblings('input').val(parseInt($(this).siblings('input').val())-1);
             $(this).siblings('input').keydown();

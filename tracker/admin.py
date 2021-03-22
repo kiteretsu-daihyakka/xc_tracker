@@ -97,7 +97,7 @@ class PurchasedItemAdmin(admin.TabularInline):
 class InvoicePurchaseAdmin(admin.ModelAdmin):
 	#exclude = ('invoice_id',)
 	#readonly_fields = ('item','item_quantity','price') 
-	list_display = ('dop','total_amount','payment_mode','status',)
+	list_display = ('invoice_no','dop','total_amount','payment_mode','status')
 	
 	change_form_template = 'tracker/admin/my_change_form.html'
 	def changeform_view(self, request, object_id, form_url = '', extra_context = None ):
@@ -115,48 +115,60 @@ class InvoicePurchaseAdmin(admin.ModelAdmin):
             'tracker/js/invoiceSellsAdmin.js',   # app static folder
 			'tracker/js/hideSaveKeepEditing.js', #saveAndKeep Btn js
 			'tracker/js/common.js', #common js for all AdminModel
+			'tracker/js/purchase-ajax_items-cat.js',
 
 		)
-	# fieldsets = (
-		# ('CUSTOMER DETAIL', {
-			# 'fields':('customer','mobile')
+	fieldsets = (
+		('INVOICE DETAILS', {
+			'fields':('invoice_no',)
+		}),
+		# ('PURCHASED ITEMS', {
+		# 	'fields':('item','item_quantity','price')
 		# }),
-		# # ('SOLD ITEMS', {
-			# # 'fields':('id.solditem.item','item_quantity','price')
-		# # }),
-		# ('TOTAL', {
-			# 'fields':('total_amount','discount','status','payment_mode')
-		# }),
+		('TOTAL', {
+			'fields':('total_amount','status','payment_mode')
+		}),
 		
-	# )
+	)
 	inlines = [PurchasedItemAdmin]
 	# def save_model(self,request,obj,form,change):
 		# print('parent model change: change)
 		# super().save_model(request,obj,form,change)
 		
 	def save_related(self, request,form,formsets,change):
-		invoice_purchase_obj = form.save()
-		print(datetime.datetime.now())
-		print(invoice_purchase_obj.dop)
+		purchase_obj = form.save()
+		# print(datetime.datetime.now())
+		# print(sells_obj.dos)
 		if change == False:
+			# print('total inline forms: ',len(formsets))
+			# i=0
 			for inline_form in formsets:
-				obj = inline_form.save()
-				obj[0].item.current_stock += obj[0].item_quantity
-				obj[0].item.save()
+				# i += 1
+				# print('iteration: ',i)
+				puchaseItm_list = inline_form.save()
+				# print('obj :',soldItm_list)
+				for purchaseItm in puchaseItm_list:
+					# if len(soldItm) > 0:
+					# print('stock updated')
+					purchaseItm.item.current_stock += purchaseItm.item_quantity
+					purchaseItm.item.save()
 		else:	
 			for inline_form in formsets:
 				#print('inline form:  ',inline_form)
 				if inline_form.has_changed():
-					print('coming in change')
-					obj = inline_form.save(commit=False)
-					print('obj above for loop: ',obj)
-					for purchased_item  in invoice_purchase_obj.purchaseditem_set.all():
-						print('obj: ',obj[0])
-						if obj[0] == purchased_item:
-							print('obj in if: ',purchased_item)
-							purchased_item.item.current_stock -= purchased_item.item_quantity
-							purchased_item.item.current_stock += obj[0].item_quantity
-							purchased_item.item.save()
+					# print('coming in change')
+					obj_list = inline_form.save(commit=False)
+					# print('obj above for loop: ',obj)
+					for obj in obj_list:
+						if obj in purchase_obj.purchaseditem_set.all():
+							for objPrev in purchase_obj.purchaseditem_set.all():
+								if objPrev == obj:
+									obj.item.current_stock -= objPrev.item_quantity
+									obj.item.current_stock += obj.item_quantity
+									obj.item.save()
+						else:
+							obj.item.current_stock += obj.item_quantity
+							obj.item.save()
 			# else:
 				# print('coming in else')
 				# obj = inline_form.save(commit=False)
@@ -313,6 +325,7 @@ class InvoiceSellsAdmin(admin.ModelAdmin):
 			'tracker/js/moreOptions.js', #gst-tab specific js
 			'tracker/js/hideSaveKeepEditing.js', #saveAndKeep Btn js
 			'tracker/js/common.js', #common js for all AdminModel
+			'tracker/js/sells-ajax_items-cat.js',
 		)
 		css = {
              'all': ('tracker/css/my_own_admin.css',)
@@ -328,7 +341,7 @@ class InvoiceSellsAdmin(admin.ModelAdmin):
 		# 	'fields':('dos',)
 		# }),
 		('TOTAL', {
-			'fields':('total_amount','discount','discount_note','status','payment_mode')
+			'fields':('total_amount','discount','discount_note','container_charge','status','payment_mode','odr_id','is_cancelled')
 		}),
 		
 	)
@@ -347,28 +360,40 @@ class InvoiceSellsAdmin(admin.ModelAdmin):
 	
 	def save_related(self, request,form,formsets,change):
 		sells_obj = form.save()
-		print(datetime.datetime.now())
-		print(sells_obj.dos)
+		# print(datetime.datetime.now())
+		# print(sells_obj.dos)
 		if change == False:
+			# print('total inline forms: ',len(formsets))
+			# i=0
 			for inline_form in formsets:
-				obj = inline_form.save()
-				if len(obj) > 0:
-					obj[0].item.current_stock -= obj[0].item_quantity
-					obj[0].item.save()
+				# i += 1
+				# print('iteration: ',i)
+				soldItm_list = inline_form.save()
+				# print('obj :',soldItm_list)
+				for soldItm in soldItm_list:
+					# if len(soldItm) > 0:
+					# print('stock updated')
+					soldItm.item.current_stock -= soldItm.item_quantity
+					soldItm.item.save()
 		else:	
 			for inline_form in formsets:
 				#print('inline form:  ',inline_form)
 				if inline_form.has_changed():
-					print('coming in change')
-					obj = inline_form.save(commit=False)
-					print('obj above for loop: ',obj)
-					for sold_item  in sells_obj.solditem_set.all():
-						print('obj: ',obj[0])
-						if obj[0] == sold_item:
-							print('obj in if: ',sold_item)
-							sold_item.item.current_stock += sold_item.item_quantity
-							sold_item.item.current_stock -= obj[0].item_quantity
-							sold_item.item.save()
+					# print('coming in change')
+					obj_list = inline_form.save(commit=False)
+					# print('obj above for loop: ',obj)
+					for obj in obj_list:
+						if obj in sells_obj.solditem_set.all():
+							for objPrev in sells_obj.solditem_set.all():
+								if objPrev == obj:
+									obj.item.current_stock += objPrev.item_quantity
+									obj.item.current_stock -= obj.item_quantity
+									obj.item.save()
+						else:
+							obj.item.current_stock -= obj.item_quantity
+							obj.item.save()
+								
+							
 	
 		super().save_related(request, form, formsets, change=change)
 		#print('form save_related:' , form)

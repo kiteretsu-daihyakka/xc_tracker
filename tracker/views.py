@@ -173,7 +173,11 @@ def home(request):
 
 def fetch_items(request):
 	lst = []
-	for item in Item.objects.filter(category__id=request.GET.get('categoryId'),current_stock__gt=0):
+	if int(request.GET.get('fromPurchase')) == 1:
+		stck_var = -1
+	else:
+		stck_var = 0
+	for item in Item.objects.filter(category__id=request.GET.get('categoryId'),current_stock__gt=stck_var):
 		lst.append({'id':item.id,'item_name':item.item_name +' ('+ str(item.price) + ')' })
 	data={
 		'items':lst,

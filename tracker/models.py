@@ -53,7 +53,7 @@ class Item(models.Model):
 	item_name = models.CharField(max_length=450)
 	price = models.IntegerField(blank=False,null=False,default=0)
 	category = models.ForeignKey(ItemCategory,models.DO_NOTHING,null=False)
-	current_stock = models.IntegerField(default=60)
+	current_stock = models.IntegerField(default=60,verbose_name='Stock')
 	
 	class Meta:
 		unique_together = (('item_name','price', 'category'),)
@@ -68,7 +68,7 @@ class Item(models.Model):
 		# return '{} {}'.format(self.item_name,self.category)
 
 class SoldItem(models.Model):
-	invoice_id = models.ForeignKey('InvoiceSells',models.DO_NOTHING,null=False)
+	invoice_id = models.ForeignKey('InvoiceSells',models.CASCADE,null=False)
 	item = models.ForeignKey(Item,models.DO_NOTHING,null=False)
 	item_quantity = models.IntegerField(blank=False,null=False)
 	price = models.FloatField(blank=False,null=False)
@@ -83,11 +83,11 @@ class SoldItem(models.Model):
 # 	return None
 		
 class InvoiceSells(models.Model):
-	# odr_id = models.IntegerField(blank=True,null=True,verbose_name='Order Id') #order id for swiggy
+	odr_id = models.IntegerField(blank=True,null=True,verbose_name='Order Id') #order id for swiggy
 	total_amount = models.FloatField(blank=False,null=False)
 	#cgst = models.FloatField(blank=False,null=False)
 	#sgst = models.FloatField(blank=False,null=False)
-	#container_charge = models.FloatField(blank=True,null=True)
+	container_charge = models.FloatField(blank=True,null=True)
 	discount = models.FloatField(blank=True,null=True)
 	discount_note = models.CharField(max_length=400,blank=True,null=True,verbose_name='Discount Note')
 	packing_chrg = models.FloatField(blank=True,null=True,verbose_name='Packing Charges')
@@ -96,7 +96,7 @@ class InvoiceSells(models.Model):
 	dos = models.DateTimeField(auto_now_add=True,verbose_name='date of selling') #dos = date of selling
 	status = models.BooleanField(verbose_name='Paid',null=False,blank=False,default=True) # payment performed or not
 	payment_mode = models.ForeignKey(PaymentMode,DO_NOTHING,null=True,blank=True)
-	# is_cancelled = models.BooleanField(default=False,verbose_name='Is Cancelled')
+	is_cancelled = models.BooleanField(default=False,verbose_name='Is Cancelled')
 	
 	class Meta:
 		verbose_name = 'Sell'
@@ -115,7 +115,7 @@ class InvoiceSells(models.Model):
 		# return self.cleaned_data
 	
 class PurchasedItem(models.Model):
-	invoice_id = models.ForeignKey('InvoicePurchase',models.DO_NOTHING,null=False)
+	invoice_id = models.ForeignKey('InvoicePurchase',models.CASCADE,null=False)
 	item = models.ForeignKey(Item,models.DO_NOTHING,null=False)
 	item_quantity = models.IntegerField(blank=False,null=False)
 	price = models.FloatField(blank=False,null=False)
@@ -128,10 +128,11 @@ class PurchasedItem(models.Model):
 		# super(PurchasedItem,self).save(*args,**kwargs)
 
 class InvoicePurchase(models.Model):
+	invoice_no = models.CharField(max_length=250,null=True,blank=True)
 	total_amount = models.FloatField(blank=False,null=False)
 	dop = models.DateTimeField(auto_now_add=True,verbose_name='date of purchase') #dop = date of purchase
 	status = models.BooleanField(verbose_name='Paid') # payment performed or not
-	payment_mode = models.CharField(max_length=50,blank=False,null=False)
+	payment_mode = models.ForeignKey(PaymentMode,DO_NOTHING,null=True,blank=True)
 	
 	class Meta:
 		verbose_name = 'Purchase'

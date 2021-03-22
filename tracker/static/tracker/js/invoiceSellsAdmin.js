@@ -4,21 +4,22 @@ $(document).ready(function(){
 	
 	// $("input[type='number']:not('#id_mobile')").attr('readonly',true);
 	
-	$('.form-row.field-odr_id').css('display','None');
+	$('.form-row.field-odr_id,.form-row.field-is_cancelled').css('display','None');
 	if($('.form-row.field-discount_note').val()!='' || $('.form-row.field-discount_note').val()!=NaN){
 		$('.form-row.field-discount_note').css('display','None');
 	}
-	$(document).on('change','.field-payment_mode select',function(){
-		// alert();
+	$(document).on('blur','#id_container_charge',function (e) { 
+		total_amount_cnt();
+	});
+	$(document).on('change','#id_payment_mode',function(){
 		if($(this).find('option:selected').text() == 'SWIGGY'){
-			// alert();
-			$('.form-row.field-odr_id').css('display','block');
+			$('.form-row.field-odr_id,.form-row.field-is_cancelled').css('display','block');
 		}else{
-			$('.form-row.field-odr_id').css('display','None');
+			$('.form-row.field-odr_id,.form-row.field-is_cancelled').css('display','None');
 		}
 	});
 	$(document).on('change','#id_discount',function () {
-		alert();
+		// alert();
 		if(parseInt($(this).val())>0){
 			$('.form-row.field-discount_note').css('display','block');
 		}
@@ -136,14 +137,25 @@ $(document).ready(function(){
 	$('#content-related').hide();
 	//$('#id_total_amount').val(0);
 	$(document).on('change','.field-price input',function(){
+		total_amount_cnt();
+	});
+	function total_amount_cnt() { 
+		console.log('coming in total cnt');
 		$('#id_total_amount').val(0);
 		$('.field-price input').each(function(){
+			console.log($(this).val());
 			/* console.log($(this).val()); */
 			if($(this).val() != ''){
+				console.log('coming in if');
 				$('#id_total_amount').val(parseInt($('#id_total_amount').val())+parseInt($(this).val()));
 			}
 		});
-	});
+		if($(document).find('#id_container_charge').length == 1){
+			if($('#id_container_charge').val() != ''){
+				$('#id_total_amount').val(parseInt($('#id_total_amount').val())+parseInt($('#id_container_charge').val()));
+			}
+		}	
+	}
 	$(document).on('change','.field-item_quantity input',function(){
 		var item_name = $(this).parent().siblings('.field-item').find('select option:selected').text();
 		//console.log(item_name);
@@ -188,29 +200,10 @@ $(document).ready(function(){
 		
 	});
 
-	$(document).on('change','.field-item-cat select',function () { 
-		catDDEle = $(this);
-        catId = catDDEle.val();
-		itemDD = catDDEle.parent('td').siblings('.field-item').find("select");
-		itemDD.html("<option></option>");
-        if (catId){
-            $.ajax({
-                url: fetchItems,
-                data: {
-                    'categoryId':catId,
-                },
-                dataType: "json",
-                success: function (response) {
-                    for(i=0;i<response.items.length;i++){
-                        itemDD.append("<option value="+response.items[i].id+">"+response.items[i].item_name+"</option>")
-                    }
-					
-                }
-            });
-        }
-		itemDD.attr('required',true);
-		itemDD.change();
-	});
+	
+	// $('select').click(function(){
+	// 	alert();
+	// });
 	$('.field-item').each(function(){
 		var slctdItm = $(this);
 		console.log(this);
